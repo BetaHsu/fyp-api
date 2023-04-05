@@ -22,8 +22,9 @@ def hello_world():
 @app.route("/api/v1/get-paragraph", methods=["GET", "OPTIONS"])
 def get_paragraph():
     paragraph = {
-        'title_interval_start': 439,
-        'title_interval_end': 476,
+        "title": "A long journey from bush to concrete",
+        "title_interval_start": 440,
+        "title_interval_end": 478,
         "paragraph": "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. ",
         "id": "flG47F77IQ",
         "creator_id": "vjakukfee",
@@ -37,6 +38,11 @@ def get_paragraph():
                 "index_interval_start": 440,
                 "index_interval_end": 478,
                 "revealed_score": 1,
+            },
+            {
+                "index_interval_start": 478,
+                "index_interval_end": 478,
+                "revealed_score": 0,
             }
         ]
     }
