@@ -34,7 +34,7 @@ def add_sentence(sentence):
     """
     # Connect to db
     user = "admin"
-    password = "DERceoY4DwgQQ9CT"
+    password = "INSERT PASSWORD HERE"
     client = MongoClient(
         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
         server_api=ServerApi('1'))

@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import make_response, request
 
@@ -16,6 +17,7 @@ def _build_cors_preflight_response():
 
 @app.route("/")
 def hello_world():
+    print(os.getenv('MONGODBPASSWORD'))
     return "<p>API works.</p>"
 
 
