@@ -15,10 +15,19 @@ def _build_cors_preflight_response():
     return response
 
 
-@app.route("/")
+@app.route("/api/test", methods=["GET", "OPTIONS"])
 def hello_world():
-    print(os.getenv('MONGODBPASSWORD'))
-    return "<p>API works.</p>"
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "GET":
+        print(os.getenv('MONGODBPASSWORD'))
+        response = make_response("<p>API works.</p>")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
 
 
 @app.route("/api/v1/get-paragraph", methods=["GET", "OPTIONS"])
@@ -54,7 +63,11 @@ def get_paragraph():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "GET":
-        return paragraph
+        response = make_response(paragraph)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
     else:
         return make_response("Unknown method.")
 
