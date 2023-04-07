@@ -25,9 +25,12 @@ def get_paragraph():
         "title": "A long journey from bush to concrete",
         "title_interval_start": 440,
         "title_interval_end": 478,
-        "paragraph": "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. ",
+        "paragraph": "Through decades that ran like rivers, <br>endless rivers of endless woes. <br>Through pick and shovel sjambok and jail. <br>O such a long long journey! <br>When the motor-car came, <br>the sledge and the ox-cart began to die. <br>But for a while the bicycle made in Britain, <br>was the dream of every village boy. <br>With the arrival of the bus, <br>the city was brought into the village, <br>and we began to yearn for the place behind the horizons. <br>Such a long travail it was. <br>A long journey from bush to concrete. ",
         "id": "flG47F77IQ",
         "creator_id": "vjakukfee",
+        "parallel_sentences": [
+            "A long journey from bush to concrete"
+        ],
         "revealed": [
             {
                 "index_interval_start": 0,
@@ -64,12 +67,19 @@ def post_paragraphs():
     else:
         return make_response("Unknown method.")
 
+@app.route("/api/v1/post-sentence-to-parallel", methods=["POST", "OPTIONS"])
+def post_sentence_to_parallel():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        database_service.add_sentence(request.get_json(force=True))
+        return make_response("Post sentence to parallel successful.")
+    else:
+        return make_response("Unknown method.")
+
 # change reveal score
 
 # get one paragraph
 
 # get multiple paragraphs
-
-
-
-# (login signup) or several dummy accounts just for prototype demo if easier?
+# login signup

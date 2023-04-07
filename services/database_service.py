@@ -11,17 +11,25 @@ from pymongo import MongoClient
 # This service is for database manipulation
 
 def add_paragraph(paragraph):
-    # Read file contents
+    # Read & Write file contents
     with open('paragraphs.json', "r+") as file:
         data = json.load(file)
-
         # Update json object
         data.append(paragraph)
-
         file.seek(0)
-
         # Write to file
         json.dump(data, file)
+def add_sentence(sentence):
+    with open('paragraphs.json', "r+") as file:
+        # Read & Write file contents
+        data = json.load(file)
+        # add new sentence to 1st element of "parallel_sentences" array
+        data[0]["parallel_sentences"].append(sentence)
+        file.seek(0)
+        # Write to file
+        json.dump(data, file)
+        # file.truncate()
+
 
     """
     # Connect to db
