@@ -20,8 +20,7 @@ def add_paragraph(paragraph):
         server_api=ServerApi('1'))
     db = client["fyp"]
     collection = db["paragraphs"]
-    response = collection.insert_one(paragraph)
-    logging.info(response)
+    return collection.insert_one(paragraph)
 
 
 def add_sentence(sentence):
@@ -113,3 +112,26 @@ def get_user_access(username):
         return jsonify({"access": access})
     else:
         return "user not found."
+
+
+# login signup
+def signup( email, password, isSigningUp):
+        # connect to the db
+        user = "admin"
+        dbpassword = os.getenv('MONGODBPASSWORD')
+        client = MongoClient(
+            "mongodb+srv://" + user + ":" + dbpassword + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+            server_api=ServerApi('1'))
+        # Get db
+        db = client["fyp"]
+        # Get collection
+        collection = db["users"]
+
+        if isSigningUp:
+            # Perform sign-up
+            collection.insert_one({'username': email, 'password': password})
+            message = 'Successfully signed up'
+        else:
+            # Perform sign-in
+            return  collection.find_one({'username': email, 'password': password})
+        return jsonify({'message': message})

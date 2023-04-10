@@ -1,7 +1,7 @@
 import logging
 import os
 
-from flask import make_response, request
+from flask import make_response, request, jsonify, render_template
 
 from app import app
 from services import database_service
@@ -79,8 +79,9 @@ def post_paragraphs():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        logging.info("post_paragraph work" + data)
-        response = make_response(database_service.add_paragraph(data))
+        # logging.info("post_paragraph work" + str(data))
+        database_service.add_paragraph(data)
+        response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")
@@ -97,7 +98,8 @@ def post_sentence_to_parallel():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        response = make_response(database_service.add_sentence(data))
+        database_service.add_sentence(data)
+        response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")
@@ -139,32 +141,24 @@ def get_user_access():
     return get_users()
 
 # login signup
-@app.route("/api/v1/signup", methods=["GET", "POST"])
+@app.route("/api/v1/signup", methods=["POST", "OPTIONS"])
 def signup():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        isSigningUp = request.form.get('isSigningUp', Flase, type=bool)
-        # connect to the db
-        user = "admin"
-        password = os.getenv('MONGODBPASSWORD')
-        client = MongoClient(
-            "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-            server_api=ServerApi('1'))
-        # Get db
-        db = client["fyp"]
-        # Get collection
-        collection = db["users"]
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == 'POST':
+        email = request.json['email']
+        password = request.json['password']
+        isSigningUp = request.json['isSigningUp']
+        response = database_service.signup(email, password, isSigningUp)
 
         if isSigningUp:
             # Perform sign-up
-            collection.insert_one({'email': email, 'password': password})
-            message = 'Successfully signed up'
+            return response
         else:
             # Perform sign-in
-            user = collection.find_one({'email': email, 'password': password})
+            user = response
             if user:
-                message = 'Successfully signed in'
+                return jsonify({'userid': str(user['_id'])})
             else:
                 message = 'Incorrect email or password'
         return jsonify({'message': message})
