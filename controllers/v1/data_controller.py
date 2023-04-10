@@ -74,27 +74,101 @@ def get_paragraph():
 
 @app.route("/api/v1/post-paragraph", methods=["POST", "OPTIONS"])
 def post_paragraphs():
+    logging.info("call post paragraph")
+    data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        database_service.add_paragraph(request.get_json(force=True))
-        return make_response("Post paragraph successful.")
+        logging.info("post_paragraph work" + data)
+        response = make_response(database_service.add_paragraph(data))
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+        # database_service.add_paragraph(request.get_json(force=True))
+        # return make_response("Post paragraph successful.")
     else:
         return make_response("Unknown method.")
+
 
 @app.route("/api/v1/post-sentence-to-parallel", methods=["POST", "OPTIONS"])
 def post_sentence_to_parallel():
+    data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        database_service.add_sentence(request.get_json(force=True))
-        return make_response("Post sentence to parallel successful.")
+        response = make_response(database_service.add_sentence(data))
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+        # database_service.add_sentence(request.get_json(force=True))
+        # return make_response("Post sentence to parallel successful.")
     else:
         return make_response("Unknown method.")
 
-# change reveal score
 
-# get one paragraph
+@app.route("/api/v1/add-user", methods=["POST", "OPTIONS"])
+def add_user():
+    data = request.get_json()
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        response = make_response(database_service.add_user(data))
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
+@app.route("/api/v1/get-user-access/<username>", methods=["GET", "OPTIONS"])
+def get_user_access():
+    username = request.get_json()
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        response = make_response(database_service.get_user_access(username))
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+    return get_users()
+
+# login signup
+@app.route("/api/v1/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        isSigningUp = request.form.get('isSigningUp', Flase, type=bool)
+        # connect to the db
+        user = "admin"
+        password = os.getenv('MONGODBPASSWORD')
+        client = MongoClient(
+            "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+            server_api=ServerApi('1'))
+        # Get db
+        db = client["fyp"]
+        # Get collection
+        collection = db["users"]
+
+        if isSigningUp:
+            # Perform sign-up
+            collection.insert_one({'email': email, 'password': password})
+            message = 'Successfully signed up'
+        else:
+            # Perform sign-in
+            user = collection.find_one({'email': email, 'password': password})
+            if user:
+                message = 'Successfully signed in'
+            else:
+                message = 'Incorrect email or password'
+        return jsonify({'message': message})
+    return render_template('signup.html')
 
 # get multiple paragraphs
-# login signup
+# change reveal score

@@ -1,6 +1,8 @@
 import logging
 import json
+import os
 
+from flask import jsonify
 from pymongo.server_api import ServerApi
 
 logging.basicConfig(level=logging.DEBUG)
@@ -11,61 +13,103 @@ from pymongo import MongoClient
 # This service is for database manipulation
 
 def add_paragraph(paragraph):
-    # Read & Write file contents
-    with open('paragraphs.json', "r+") as file:
-        data = json.load(file)
-        # Update json object
-        data.append(paragraph)
-        file.seek(0)
-        # Write to file
-        json.dump(data, file)
-def add_sentence(sentence):
-    with open('paragraphs.json', "r+") as file:
-        # Read & Write file contents
-        data = json.load(file)
-        # add new sentence to 1st element of "parallel_sentences" array
-        data[0]["parallel_sentences"].append(sentence)
-        file.seek(0)
-        # Write to file
-        json.dump(data, file)
-        # file.truncate()
-
-
-    """
-    # Connect to db
     user = "admin"
-    password = "INSERT PASSWORD HERE"
+    password = os.getenv('MONGODBPASSWORD')
     client = MongoClient(
         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
         server_api=ServerApi('1'))
-    logging.debug(client)
+    db = client["fyp"]
+    collection = db["paragraphs"]
+    response = collection.insert_one(paragraph)
+    logging.info(response)
+
+
+def add_sentence(sentence):
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+    db = client["fyp"]
+    collection = db["paragraphs"]
+
+    # Find the document where to add the new sentence
+    query = {"title": "A long journey from bush to concrete"}
+    document = collection.find_one(query)
+    # Append the new sentence to the existing sentences array
+    document["parallel_sentences"].append(sentence)
+    # Update the document in the MongoDB collection
+    response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
+
+    # with open('paragraphs.json', "r+") as file:
+    #     # Read & Write file contents
+    #     data = json.load(file)
+    #     # add new sentence to 1st element of "parallel_sentences" array
+    #     data[0]["parallel_sentences"].append(sentence)
+    #     file.seek(0)
+    #     json.dump(data, file)
+
+
+# Users database related
+
+
+def add_user(data):
+    # connect to the db
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+    # logging.debug(client)
 
     # Get db
     db = client["fyp"]
-    logging.debug(db)
+    # logging.debug(db)
 
     # Get collection
-    collection = db["paragraphs"]
-    logging.debug(collection)
+    collection = db["users"]
+    # logging.debug(collection)
 
-    # Construct data object
-    paragraph = {
-        "paragraph": "Through decades that ran like rivers…",
-        "id": "flG47F77IQ",
-        "creator_id": "vjakukfe",
-        "revealed": [
-            {
-                "index_intervall": "0:20",
-                "revealed_score": 1,
-            },
-            {
-                "index_intervall": "20:360",
-                "revealed_score": 0,
-            }
-        ]
-    }
+    # construct user object (new dictionary of user) if data dictionary contains both password and username keys
+    # logging.info(data)
+    if data["password"] and data["username"]:
+        user = {
+            "password": data["password"],
+            "username": data["username"]
+        }
 
-    # Insert the object
-    response = collection.insert_one(paragraph)
-    logging.info(response)
-    """
+        # Insert the object
+        logging.info("Inserting user: ")
+        logging.info(user)
+        # inserts the user object into the users collection in the database
+        response = collection.insert_one(user)
+        logging.info(response)
+        return "Created user."
+    else:
+        return "Password or username missing."
+
+
+def get_user_access(username):
+    # connect to the db
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+
+    # Get db
+    db = client["fyp"]
+
+    # Get collection
+    collection = db["users"]
+
+    # find currentUser by username
+    currentUser = collection.find_one({"username": username})
+
+    # check if currentUser exist
+    if currentUser:
+        # get access restrictions & return
+        access = user.get("access")
+        return jsonify({"access": access})
+    else:
+        return "user not found."
