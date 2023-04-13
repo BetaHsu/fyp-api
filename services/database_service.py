@@ -43,7 +43,7 @@ def add_sentence(sentence):
 
 
 # login signup
-def signup(email, password, isSigningUp):
+def signup(username, email, password, isSigningUp):
     # connect to the db
     user = "admin"
     dbpassword = os.getenv('MONGODBPASSWORD')
@@ -55,43 +55,43 @@ def signup(email, password, isSigningUp):
 
     if isSigningUp:
         # Perform sign-up
-        collection.insert_one({'username': email, 'password': password})
+        collection.insert_one({'username': username, 'email': email, 'password': password})
         message = 'Successfully signed up'
     else:
         # Perform sign-in
-        return collection.find_one({'username': email, 'password': password})
+        return collection.find_one({'username': username, 'email': email, 'password': password})
     return jsonify({'message': message})
 
 
 # Users database related
 
 
-def add_user(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
-    db = client["fyp"]
-    collection = db["users"]
-
-    # construct user object (new dictionary of user) if data dictionary contains both password and username keys
-    # logging.info(data)
-    if data["password"] and data["username"]:
-        user = {
-            "password": data["password"],
-            "username": data["username"]
-        }
-
-        # Insert the object
-        logging.info("Inserting user: ")
-        logging.info(user)
-        # inserts the user object into the users collection in the database
-        response = collection.insert_one(user)
-        logging.info(response)
-        return "Created user."
-    else:
-        return "Password or username missing."
+# def add_user(data):
+#     user = "admin"
+#     password = os.getenv('MONGODBPASSWORD')
+#     client = MongoClient(
+#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         server_api=ServerApi('1'))
+#     db = client["fyp"]
+#     collection = db["users"]
+#
+#     # construct user object (new dictionary of user) if data dictionary contains both password and username keys
+#     # logging.info(data)
+#     if data["password"] and data["username"]:
+#         user = {
+#             "password": data["password"],
+#             "username": data["username"]
+#         }
+#
+#         # Insert the object
+#         logging.info("Inserting user: ")
+#         logging.info(user)
+#         # inserts the user object into the users collection in the database
+#         response = collection.insert_one(user)
+#         logging.info(response)
+#         return "Created user."
+#     else:
+#         return "Password or username missing."
 
 
 def get_user_access(username):
