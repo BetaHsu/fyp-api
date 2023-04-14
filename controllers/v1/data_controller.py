@@ -117,7 +117,7 @@ def get_paragraph(paragraph_id):
 @app.route("/api/v1/post-paragraph", methods=["POST", "OPTIONS"])
 def post_paragraphs():
     # logging.info("call post paragraph")
-    data = request.get_json()
+    data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
@@ -134,7 +134,7 @@ def post_paragraphs():
 
 @app.route("/api/v1/post-sentence-to-parallel", methods=["POST", "OPTIONS"])
 def post_sentence_to_parallel():
-    data = request.get_json()
+    data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
@@ -144,8 +144,6 @@ def post_sentence_to_parallel():
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")
         return response
-        # database_service.add_sentence(request.get_json(force=True))
-        # return make_response("Post sentence to parallel successful.")
     else:
         return make_response("Unknown method.")
 

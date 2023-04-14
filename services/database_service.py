@@ -24,7 +24,7 @@ def add_paragraph(paragraph):
     return collection.insert_one(paragraph)
 
 
-def add_sentence(sentence):
+def add_sentence(data):
     user = "admin"
     password = os.getenv('MONGODBPASSWORD')
     client = MongoClient(
@@ -33,14 +33,19 @@ def add_sentence(sentence):
     db = client["fyp"]
     collection = db["paragraphs"]
 
+    # Extract the originalParagraphId & id & sentence property from the data object
+    original_paragraph_id = data['originalParagraphId']
+    sentence = data['sentence']
+    new_paragraph_id = data['id']
     # Find the document where to add the new sentence
-    query = {"title": "A long journey from bush to concrete"}
+    query = {"id": original_paragraph_id}
     document = collection.find_one(query)
-    # Append the new sentence to the existing sentences array
-    document["parallel_sentences"].append(sentence)
+
+    new_object = {"id": new_paragraph_id, "sentence": sentence}
+    # Append the new id & sentence to the existing sentences array
+    document["parallel_sentences"].append(new_object)
     # Update the document in the MongoDB collection
     response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
-
 
 # login signup
 def signup(username, email, password, isSigningUp):
