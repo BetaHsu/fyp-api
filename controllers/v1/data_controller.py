@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 from pymongo import MongoClient
 from bson import ObjectId
+from bson.json_util import dumps
 
 from app import app
 from services import database_service
@@ -37,53 +38,6 @@ def hello_world():
         return make_response("Unknown method.")
 
 
-# @app.route("/api/v1/get-paragraph", methods=["GET", "OPTIONS"])
-# def get_paragraph():
-#     paragraph = {
-#         "title": "A long journey from bush to concrete",
-#         "title_interval_start": 483,
-#         "title_interval_end": 526,
-#         "paragraph": "Through decades that ran like rivers, <br>endless rivers of endless woes. <br>Through pick and shovel sjambok and jail. <br>O such a long long journey! <br>When the motor-car came, <br>the sledge and the ox-cart began to die. <br>But for a while the bicycle made in Britain, <br>was the dream of every village boy. <br>With the arrival of the bus, <br>the city was brought into the village, <br>and we began to yearn for the place behind the horizons. <br>Such a long travail it was. <br>A long journey from bush to concrete. ",
-#         "id": "flG47F77IQ",
-#         "creator_id": "vjakukfee",
-#         "creator_username": "betaHsu1",
-#         "reveal_score_to_public": 0,
-#         "parallel_sentences": [
-#             {
-#                 "id": "flG47F77IQ",
-#                 "title": "A long journey from bush to concrete"
-#             }
-#         ],
-#         "revealed": [
-#             {
-#                 "index_interval_start": 0,
-#                 "index_interval_end": 483,
-#                 "revealed_score": 0,
-#             },
-#             {
-#                 "index_interval_start": 483,
-#                 "index_interval_end": 526,
-#                 "revealed_score": 1,
-#             },
-#             {
-#                 "index_interval_start": 526,
-#                 "index_interval_end": 526,
-#                 "revealed_score": 0,
-#             }
-#         ]
-#     }
-#     if request.method == "OPTIONS":
-#         return _build_cors_preflight_response()
-#     elif request.method == "GET":
-#         response = make_response(paragraph)
-#         response.headers.add("Access-Control-Allow-Origin", "*")
-#         response.headers.add("Access-Control-Allow-Headers", "*")
-#         response.headers.add("Access-Control-Allow-Methods", "*")
-#         return response
-#     else:
-#         return make_response("Unknown method.")
-
-
 @app.route("/api/v1/get-paragraph/<paragraph_id>", methods=["GET", "OPTIONS"])
 def get_paragraph(paragraph_id):
     if request.method == "OPTIONS":
@@ -106,6 +60,37 @@ def get_paragraph(paragraph_id):
             response = make_response(jsonify(paragraph), 200)
         else:
             response = make_response("Paragraph not found", 404)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
+@app.route("/api/v1/get-all-paragraph-id", methods=["GET", "OPTIONS"])
+def get_all_paragraph_id():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "GET":
+        user = "admin"
+        password = os.getenv('MONGODBPASSWORD')
+        client = MongoClient(
+            "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+            server_api=ServerApi('1'))
+        db = client["fyp"]
+        collection = db["paragraphs"]
+        # paragraphs = list(collection.find({}, {"_id": 1}))
+
+        if collection is not None: # compare collection with None instead of using it as a boolean
+            # find all documents and only retrieve "_id" & "title" fields,
+            # convert pymongo cursor object to list of dictionaries
+            paragraphs = list(collection.find({}, {"_id": 1, "title": 1}))
+            # paragraph_ids = [str(paragraph["_id"]) for paragraph in paragraphs]
+            response = make_response(dumps(paragraphs), 200)
+        else:
+            response = make_response("Paragraph not found", 404)
+
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")

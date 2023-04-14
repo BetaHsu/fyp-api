@@ -4,6 +4,7 @@ import os
 
 from flask import jsonify
 from pymongo.server_api import ServerApi
+from bson.objectid import ObjectId
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -33,14 +34,14 @@ def add_sentence(data):
     db = client["fyp"]
     collection = db["paragraphs"]
 
-    # Extract the originalParagraphId & id & sentence property from the data object
+    # Extract the originalParagraphId & newParagraphId & sentence property from the data object
     original_paragraph_id = data['originalParagraphId']
     sentence = data['sentence']
-    new_paragraph_id = data['id']
+    new_paragraph_id = data['newParagraphId']
     # Find the document where to add the new sentence
-    query = {"id": original_paragraph_id}
+    query = {"_id": ObjectId(original_paragraph_id)}
     document = collection.find_one(query)
-
+    logging.info(document)
     new_object = {"id": new_paragraph_id, "sentence": sentence}
     # Append the new id & sentence to the existing sentences array
     document["parallel_sentences"].append(new_object)
