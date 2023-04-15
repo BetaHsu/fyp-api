@@ -48,6 +48,32 @@ def add_sentence(data):
     # Update the document in the MongoDB collection
     response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
 
+
+def add_work_id_to_user(data):
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+    db = client["fyp"]
+    collection = db["users"]
+
+    # Extract the workId & userName  property from the data object
+    work_id = data['workId']
+    user_name = data['userName']
+    # Find the document where to add the new sentence
+    query = {"username": user_name}
+    document = collection.find_one(query)
+    logging.info(document)
+    # Append the work_id to the existing works array
+    if "works" in document:
+        document["works"].append(work_id)
+    else:
+        document["works"] = [work_id]
+    # Update the document in the MongoDB collection
+    response = collection.update_one(query, {"$set": {"works": document["works"]}})
+
+
 # login signup
 def signup(username, email, password, isSigningUp):
     # connect to the db

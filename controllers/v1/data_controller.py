@@ -99,6 +99,34 @@ def get_all_paragraph_id():
         return make_response("Unknown method.")
 
 
+@app.route("/api/v1/get-user-works/<username>", methods=["GET", "OPTIONS"])
+def get_user_works(username):
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "GET":
+        user = "admin"
+        password = os.getenv('MONGODBPASSWORD')
+        client = MongoClient(
+            "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+            server_api=ServerApi('1'))
+        db = client["fyp"]
+        collection = db["users"]
+
+        current_user = collection.find_one({"username": username})
+        if current_user:
+            works = current_user.get("works", [])
+            response = make_response(jsonify(works), 200)
+        else:
+            response = make_response("User not found", 404)
+
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
 @app.route("/api/v1/post-paragraph", methods=["POST", "OPTIONS"])
 def post_paragraphs():
     # logging.info("call post paragraph")
@@ -124,6 +152,23 @@ def post_sentence_to_parallel():
         return _build_cors_preflight_response()
     elif request.method == "POST":
         database_service.add_sentence(data)
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
+
+@app.route("/api/v1/post-work-id-to-user", methods=["POST", "OPTIONS"])
+def post_work_id_to_user():
+    data = request.get_json(force=True)
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        database_service.add_work_id_to_user(data)
         response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
