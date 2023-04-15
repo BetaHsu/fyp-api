@@ -130,13 +130,12 @@ def get_user_works(username):
 @app.route("/api/v1/post-paragraph", methods=["POST", "OPTIONS"])
 def post_paragraphs():
     # logging.info("call post paragraph")
-    data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
         # logging.info("post_paragraph work" + str(data))
-        database_service.add_paragraph(data)
-        response = make_response()
+        data = request.get_json()
+        response = make_response(database_service.add_paragraph(data))
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")

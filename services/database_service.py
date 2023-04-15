@@ -22,7 +22,17 @@ def add_paragraph(paragraph):
     db = client["fyp"]
     collection = db["paragraphs"]
 
-    return collection.insert_one(paragraph)
+    insert_result = collection.insert_one(paragraph)
+    # get the ObjectId of the inserted document
+    inserted_id = insert_result.inserted_id
+    # update the document with the 1st_element field containing the ObjectId
+    collection.update_one({"_id": inserted_id}, {"$set": {"parallel_sentences.0.id": str(inserted_id)}})
+    # paragraph["parallel_sentences"][0]["id"] = str(inserted_id)
+
+
+    # return the inserted document w/ the _id field
+    logging.info(paragraph)
+    return jsonify(paragraph)
 
 
 def add_sentence(data):
@@ -72,6 +82,7 @@ def add_work_id_to_user(data):
         document["works"] = [work_id]
     # Update the document in the MongoDB collection
     response = collection.update_one(query, {"$set": {"works": document["works"]}})
+
 
 
 # login signup
