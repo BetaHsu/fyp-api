@@ -85,8 +85,9 @@ def get_all_paragraph_id():
         if collection is not None: # compare collection with None instead of using it as a boolean
             # find all documents and only retrieve "_id" & "title" fields,
             # convert pymongo cursor object to list of dictionaries
-            paragraphs = list(collection.find({}, {"_id": 1, "title": 1}))
+            paragraphs = list(collection.find({}, {"_id": 1, "title": 1, "parallel_sentences.id": 1}))
             # paragraph_ids = [str(paragraph["_id"]) for paragraph in paragraphs]
+            logging.info(paragraphs)
             response = make_response(dumps(paragraphs), 200)
         else:
             response = make_response("Paragraph not found", 404)
@@ -160,6 +161,21 @@ def post_sentence_to_parallel():
         return make_response("Unknown method.")
 
 
+@app.route("/api/v1/post-revealed-to-hidden", methods=["POST", "OPTIONS"])
+def post_revealed_to_hidden():
+    data = request.get_json(force=True)
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        database_service.add_revealed_to_hidden(data)
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
 
 @app.route("/api/v1/post-work-id-to-user", methods=["POST", "OPTIONS"])
 def post_work_id_to_user():
@@ -176,9 +192,6 @@ def post_work_id_to_user():
     else:
         return make_response("Unknown method.")
 
-
-# fetch all paragraphs
-# fetch multiple paragraph
 
 # login signup
 @app.route("/api/v1/signup", methods=["POST", "OPTIONS"])
@@ -210,21 +223,6 @@ def signup():
     return render_template('signup.html')
 
 
-# @app.route("/api/v1/add-user", methods=["POST", "OPTIONS"])
-# def add_user():
-#     data = request.get_json()
-#     if request.method == "OPTIONS":
-#         return _build_cors_preflight_response()
-#     elif request.method == "POST":
-#         response = make_response(database_service.add_user(data))
-#         response.headers.add("Access-Control-Allow-Origin", "*")
-#         response.headers.add("Access-Control-Allow-Headers", "*")
-#         response.headers.add("Access-Control-Allow-Methods", "*")
-#         return response
-#     else:
-#         return make_response("Unknown method.")
-
-
 @app.route("/api/v1/get-user-access/<username>", methods=["GET", "OPTIONS"])
 def get_user_access():
     username = request.get_json()
@@ -240,5 +238,4 @@ def get_user_access():
         return make_response("Unknown method.")
     return get_users()
 
-# get multiple paragraphs
 # change reveal score

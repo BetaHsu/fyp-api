@@ -59,6 +59,42 @@ def add_sentence(data):
     response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
 
 
+def add_revealed_to_hidden(data):
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+    db = client["fyp"]
+    collection = db["paragraphs"]
+
+    # Extract the originalParagraphId & chosenIndex property from the data object
+    original_paragraph_id = data['originalParagraphId']
+    chosen_index = data['chosenIndex']
+    insert_revealed = data['insertRevealed']
+
+    # Find the document where to add the new revealed
+    query = {"_id": ObjectId(original_paragraph_id)}
+    document = collection.find_one(query)
+
+    # Remove the chosen item from the 'revealed' array
+    removed_item = document['revealed'].pop(chosen_index)
+
+    # Get the index where the new items will be inserted
+    index_to_insert = chosen_index
+
+    # Modify the new items to set their start indices
+    # for item in insert_revealed:
+    #     item['index_interval_start'] += index_to_insert
+    # Insert the new items into the 'revealed' array
+    for item in reversed(insert_revealed):
+        document['revealed'].insert(index_to_insert, item)
+
+    # Update the document in the MongoDB collection
+    response = collection.replace_one(query, document)
+    return response
+
+
 def add_work_id_to_user(data):
     user = "admin"
     password = os.getenv('MONGODBPASSWORD')
