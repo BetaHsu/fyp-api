@@ -88,8 +88,21 @@ def add_revealed_to_hidden(data):
     #     item['index_interval_start'] += index_to_insert
     # Insert the new items into the 'revealed' array
     for item in reversed(insert_revealed):
-        document['revealed'].insert(index_to_insert, item)
+        matching_item = next((x for x in document['revealed'] if x['index_interval_start'] == item['index_interval_start']), None)
+        if matching_item:
+            matching_item['index_interval_end'] += 1
+        else:
+            document['revealed'].insert(index_to_insert, item)
 
+    # check for duplicate and merge them
+    # new_revealed = []
+    # for item in document['revealed']:
+    #     if item not in new_revealed:
+    #         new_revealed.append(item)
+    #     else:
+    #         index = new_revealed.index(item)
+    #         new_revealed[index]['count'] += 1
+    # document['revealed'] = new_revealed
     # Update the document in the MongoDB collection
     response = collection.replace_one(query, document)
     return response
