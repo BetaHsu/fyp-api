@@ -147,12 +147,29 @@ def signup(username, email, password, isSigningUp):
 
     if isSigningUp:
         # Perform sign-up
-        collection.insert_one({'username': username, 'email': email, 'password': password})
-        message = 'Successfully signed up'
+        username_exist = collection.find_one({'username': username})
+        email_exist = collection.find_one({'email': email})
+        if username_exist and email_exist:
+            response = {'message': 'Username and Email already exist', 'username_message': 'Username already exist', 'email_message': 'Email already exist'}
+        elif username_exist:
+            response = {'message': 'Username already exist', 'username_message': 'Username already exist', 'email_message': ''}
+        elif email_exist:
+            response = {'message': 'Email already exist', 'username_message': '', 'email_message': 'Email already exist'}
+        # document = collection.find_one({'username': username, 'email': email, 'password': password})
+        else:
+            collection.insert_one({'username': username, 'email': email, 'password': password})
+            response = {'message': 'Successfully signed up', 'username_message': '', 'email_message': ''}
     else:
         # Perform sign-in
-        return collection.find_one({'username': username, 'email': email, 'password': password})
-    return jsonify({'message': message})
+        user = collection.find_one({'email': email, 'password': password})
+        if user:
+            response = user
+        else:
+            response = {'message': 'Incorrect email or password', 'username_message': '', 'email_message': ''}
+    return response
+    # 'username': username,
+    # return {'message': message, 'status': status}
+    # return jsonify({'message': message})
 
 
 # Users database related

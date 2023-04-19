@@ -207,19 +207,16 @@ def signup():
 
         if isSigningUp:
             # Perform sign-up, 201 "Created"
-            return jsonify({'message': 'Successfully signed up'}), 201
-            # return response
+            if response['message'] == 'Successfully signed up':
+                return jsonify({'message': 'Successfully signed up', 'username_message': '', 'email_message': ''}), 201
+            else:
+                return jsonify({'message': response['message'], 'username_message': response['username_message'], 'email_message': response['email_message']}), 409
         else:
             # Perform sign-in, 200 "OK", 401 "Unauthorized"
-            user = response
-            logging.info(response)
-            if user:
-                return jsonify({'userid': str(user['_id'])}), 200
+            if 'message' in response:
+                return jsonify({'message': response['message'], 'username_message': response['username_message'], 'email_message': response['email_message']}), 409
             else:
-                return jsonify({'message': 'Incorrect email or password'}), 401
-        # response = jsonify({'message': message})
-        # return response
-        # return jsonify({'message': message})
+                return jsonify({'userid': str(response['_id']), 'username': str(response['username'])}), 200
     return render_template('signup.html')
 
 
