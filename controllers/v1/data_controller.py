@@ -167,8 +167,10 @@ def post_revealed_to_hidden():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        database_service.add_revealed_to_hidden(data)
-        response = make_response()
+        matching_item_exist = database_service.add_revealed_to_hidden(data)['matching_item_exist']
+        response_data = {'matching_item_exist': matching_item_exist}
+        response = jsonify(response_data)
+        # response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")

@@ -77,35 +77,34 @@ def add_revealed_to_hidden(data):
     query = {"_id": ObjectId(original_paragraph_id)}
     document = collection.find_one(query)
 
-    # Remove the chosen item from the 'revealed' array
-    removed_item = document['revealed'].pop(chosen_index)
+    # Remove any items from insert_revealed that already exist in revealed
+    # insert_revealed = [item for item in insert_revealed if not any(existing_item['index_interval_start'] == item['index_interval_start'] for existing_item in document['revealed'])]
+    #
+    # insert_revealed = [item for item in insert_revealed if not any(existing_item['index_interval_start'] == item['index_interval_start'] for existing_item in document['revealed'])]
+    # logging.info(insert_revealed)
 
-    # Get the index where the new items will be inserted
-    index_to_insert = chosen_index
+    # for existing_item in document['revealed']:
+    #     insert_revealed = [item for item in insert_revealed if not (existing_item['index_interval_start'] == item['index_interval_start'] and existing_item['index_interval_end'] == item['index_interval_end'] and existing_item['revealed_score'] == item['revealed_score'])]
+    removed_item = document['revealed'][chosen_index]
+    # Check if any items in insert_revealed match existing items in revealed
 
-    # Modify the new items to set their start indices
-    # for item in insert_revealed:
-    #     item['index_interval_start'] += index_to_insert
-    # Insert the new items into the 'revealed' array
-    for item in reversed(insert_revealed):
-        matching_item = next((x for x in document['revealed'] if x['index_interval_start'] == item['index_interval_start']), None)
-        if matching_item:
-            matching_item['index_interval_end'] += 1
-        else:
+    matching_items = [item for item in insert_revealed if
+                      item['index_interval_start'] == removed_item['index_interval_start'] and item['index_interval_end'] == removed_item['index_interval_end'] and item['revealed_score'] == removed_item['revealed_score']]
+    if len(matching_items) > 0:
+        print("There are matching items, so no changes will be made")
+        response_data = {'matching_item_exist': True}
+    else:
+        # Remove the chosen item from the 'revealed' array
+        document['revealed'].pop(chosen_index)
+        # Get the index where the new items will be inserted
+        index_to_insert = chosen_index
+        # Insert the remaining items from "insert_revealed" at the same position
+        for item in reversed(insert_revealed):
             document['revealed'].insert(index_to_insert, item)
-
-    # check for duplicate and merge them
-    # new_revealed = []
-    # for item in document['revealed']:
-    #     if item not in new_revealed:
-    #         new_revealed.append(item)
-    #     else:
-    #         index = new_revealed.index(item)
-    #         new_revealed[index]['count'] += 1
-    # document['revealed'] = new_revealed
-    # Update the document in the MongoDB collection
-    response = collection.replace_one(query, document)
-    return response
+        # Update the document in the MongoDB collection
+        response = collection.replace_one(query, document)
+        response_data = {'matching_item_exist': False}
+    return response_data
 
 
 def add_work_id_to_user(data):
