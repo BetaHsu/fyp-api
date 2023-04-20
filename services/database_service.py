@@ -59,7 +59,7 @@ def add_sentence(data):
     response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
 
 
-def add_revealed_to_hidden(data):
+def add_revealed_to_change(data):
     user = "admin"
     password = os.getenv('MONGODBPASSWORD')
     client = MongoClient(
@@ -76,23 +76,16 @@ def add_revealed_to_hidden(data):
     # Find the document where to add the new revealed
     query = {"_id": ObjectId(original_paragraph_id)}
     document = collection.find_one(query)
-
-    # Remove any items from insert_revealed that already exist in revealed
-    # insert_revealed = [item for item in insert_revealed if not any(existing_item['index_interval_start'] == item['index_interval_start'] for existing_item in document['revealed'])]
-    #
-    # insert_revealed = [item for item in insert_revealed if not any(existing_item['index_interval_start'] == item['index_interval_start'] for existing_item in document['revealed'])]
-    # logging.info(insert_revealed)
-
-    # for existing_item in document['revealed']:
-    #     insert_revealed = [item for item in insert_revealed if not (existing_item['index_interval_start'] == item['index_interval_start'] and existing_item['index_interval_end'] == item['index_interval_end'] and existing_item['revealed_score'] == item['revealed_score'])]
     removed_item = document['revealed'][chosen_index]
-    # Check if any items in insert_revealed match existing items in revealed
 
+    # Check if any items in insert_revealed match existing items in revealed
     matching_items = [item for item in insert_revealed if
                       item['index_interval_start'] == removed_item['index_interval_start'] and item['index_interval_end'] == removed_item['index_interval_end'] and item['revealed_score'] == removed_item['revealed_score']]
     if len(matching_items) > 0:
         print("There are matching items, so no changes will be made")
-        response_data = {'matching_item_exist': True}
+        matching_item_exist = True
+        return document, matching_item_exist;
+        # response_data = {'matching_item_exist': True}
     else:
         # Remove the chosen item from the 'revealed' array
         document['revealed'].pop(chosen_index)
@@ -103,8 +96,27 @@ def add_revealed_to_hidden(data):
             document['revealed'].insert(index_to_insert, item)
         # Update the document in the MongoDB collection
         response = collection.replace_one(query, document)
-        response_data = {'matching_item_exist': False}
-    return response_data
+        matching_item_exist = False
+        # response_data = {'matching_item_exist': False}
+        return document, matching_item_exist
+
+
+def update_score(data):
+    user = "admin"
+    password = os.getenv('MONGODBPASSWORD')
+    client = MongoClient(
+        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+        server_api=ServerApi('1'))
+    db = client["fyp"]
+    collection = db["paragraphs"]
+
+    # Extract the originalParagraphId & newParagraphId & sentence property from the data object
+    original_paragraph_id = data['originalParagraphId']
+    new_reveal_score_to_public = data['newRevealScoreToPublic']
+    # Find the document where to add the new sentence
+    query = {"_id": ObjectId(original_paragraph_id)}
+    # document = collection.find_one(query)
+    response = collection.update_one(query, {"$set": {"reveal_score_to_public": new_reveal_score_to_public}})
 
 
 def add_work_id_to_user(data):
@@ -132,8 +144,6 @@ def add_work_id_to_user(data):
     response = collection.update_one(query, {"$set": {"works": document["works"]}})
 
 
-
-# login signup
 def signup(username, email, password, isSigningUp):
     # connect to the db
     user = "admin"
@@ -166,15 +176,10 @@ def signup(username, email, password, isSigningUp):
         else:
             response = {'message': 'Incorrect email or password', 'username_message': '', 'email_message': ''}
     return response
-    # 'username': username,
-    # return {'message': message, 'status': status}
-    # return jsonify({'message': message})
 
 
-# Users database related
-
-
-# def add_user(data):
+# def get_user_access(username):
+#     # connect to the db
 #     user = "admin"
 #     password = os.getenv('MONGODBPASSWORD')
 #     client = MongoClient(
@@ -183,42 +188,13 @@ def signup(username, email, password, isSigningUp):
 #     db = client["fyp"]
 #     collection = db["users"]
 #
-#     # construct user object (new dictionary of user) if data dictionary contains both password and username keys
-#     # logging.info(data)
-#     if data["password"] and data["username"]:
-#         user = {
-#             "password": data["password"],
-#             "username": data["username"]
-#         }
+#     # find currentUser by username
+#     currentUser = collection.find_one({"username": username})
 #
-#         # Insert the object
-#         logging.info("Inserting user: ")
-#         logging.info(user)
-#         # inserts the user object into the users collection in the database
-#         response = collection.insert_one(user)
-#         logging.info(response)
-#         return "Created user."
+#     # check if currentUser exist
+#     if currentUser:
+#         # get access restrictions & return
+#         access = user.get("access")
+#         return jsonify({"access": access})
 #     else:
-#         return "Password or username missing."
-
-
-def get_user_access(username):
-    # connect to the db
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
-    db = client["fyp"]
-    collection = db["users"]
-
-    # find currentUser by username
-    currentUser = collection.find_one({"username": username})
-
-    # check if currentUser exist
-    if currentUser:
-        # get access restrictions & return
-        access = user.get("access")
-        return jsonify({"access": access})
-    else:
-        return "user not found."
+#         return "user not found."

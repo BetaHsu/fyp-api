@@ -161,16 +161,35 @@ def post_sentence_to_parallel():
         return make_response("Unknown method.")
 
 
-@app.route("/api/v1/post-revealed-to-hidden", methods=["POST", "OPTIONS"])
-def post_revealed_to_hidden():
+@app.route("/api/v1/post-revealed-to-change", methods=["POST", "OPTIONS"])
+def post_revealed_to_change():
     data = request.get_json(force=True)
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        matching_item_exist = database_service.add_revealed_to_hidden(data)['matching_item_exist']
-        response_data = {'matching_item_exist': matching_item_exist}
+        updated_document, matching_item_exist = database_service.add_revealed_to_change(data)
+        response_data = {
+            'matching_item_exist': matching_item_exist,
+            'updated_revealed_array': updated_document["revealed"]
+        }
         response = jsonify(response_data)
         # response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
+@app.route("/api/v1/post-new-score", methods=["POST", "OPTIONS"])
+def post_new_score():
+    data = request.get_json(force=True)
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        database_service.update_score(data)
+        response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add("Access-Control-Allow-Methods", "*")
