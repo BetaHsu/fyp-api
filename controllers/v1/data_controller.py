@@ -167,9 +167,8 @@ def post_revealed_to_change():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     elif request.method == "POST":
-        updated_document, matching_item_exist = database_service.add_revealed_to_change(data)
+        updated_document = database_service.add_revealed_to_change(data)
         response_data = {
-            'matching_item_exist': matching_item_exist,
             'updated_revealed_array': updated_document["revealed"]
         }
         response = jsonify(response_data)

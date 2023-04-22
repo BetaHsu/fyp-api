@@ -70,35 +70,15 @@ def add_revealed_to_change(data):
 
     # Extract the originalParagraphId & chosenIndex property from the data object
     original_paragraph_id = data['originalParagraphId']
-    chosen_index = data['chosenIndex']
-    insert_revealed = data['insertRevealed']
+    selected_line_index = data['selectedLineIndex']
+    line_array_copy = data['lineArrayCopy']
 
     # Find the document where to add the new revealed
     query = {"_id": ObjectId(original_paragraph_id)}
     document = collection.find_one(query)
-    removed_item = document['revealed'][chosen_index]
-
-    # Check if any items in insert_revealed match existing items in revealed
-    matching_items = [item for item in insert_revealed if
-                      item['index_interval_start'] == removed_item['index_interval_start'] and item['index_interval_end'] == removed_item['index_interval_end'] and item['revealed_score'] == removed_item['revealed_score']]
-    if len(matching_items) > 0:
-        print("There are matching items, so no changes will be made")
-        matching_item_exist = True
-        return document, matching_item_exist;
-        # response_data = {'matching_item_exist': True}
-    else:
-        # Remove the chosen item from the 'revealed' array
-        document['revealed'].pop(chosen_index)
-        # Get the index where the new items will be inserted
-        index_to_insert = chosen_index
-        # Insert the remaining items from "insert_revealed" at the same position
-        for item in reversed(insert_revealed):
-            document['revealed'].insert(index_to_insert, item)
-        # Update the document in the MongoDB collection
-        response = collection.replace_one(query, document)
-        matching_item_exist = False
-        # response_data = {'matching_item_exist': False}
-        return document, matching_item_exist
+    document['revealed'][selected_line_index] = line_array_copy
+    collection.replace_one(query, document)
+    return document
 
 
 def update_score(data):
