@@ -181,6 +181,26 @@ def post_revealed_to_change():
         return make_response("Unknown method.")
 
 
+@app.route("/api/v1/post-hidden-to-change", methods=["POST", "OPTIONS"])
+def post_hidden_to_change():
+    data = request.get_json(force=True)
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        updated_document = database_service.add_hidden_to_change(data)
+        response_data = {
+            'updated_revealed_array': updated_document["revealed"]
+        }
+        response = jsonify(response_data)
+        # response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+    else:
+        return make_response("Unknown method.")
+
+
 @app.route("/api/v1/post-new-score", methods=["POST", "OPTIONS"])
 def post_new_score():
     data = request.get_json(force=True)
@@ -195,6 +215,9 @@ def post_new_score():
         return response
     else:
         return make_response("Unknown method.")
+
+
+
 
 
 @app.route("/api/v1/post-work-id-to-user", methods=["POST", "OPTIONS"])
