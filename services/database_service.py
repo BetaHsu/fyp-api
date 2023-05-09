@@ -60,30 +60,8 @@ def add_sentence(data):
     response = collection.update_one(query, {"$set": {"parallel_sentences": document["parallel_sentences"]}})
 
 
-def add_revealed_to_change(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
-    db = client["fyp"]
-    collection = db["paragraphs"]
-
-    # Extract the originalParagraphId & chosenIndex property from the data object
-    original_paragraph_id = data['originalParagraphId']
-    selected_line_index = data['selectedLineIndex']
-    line_array_copy = data['lineArrayCopy']
-
-    # Find the document where to add the new revealed
-    query = {"_id": ObjectId(original_paragraph_id)}
-    document = collection.find_one(query)
-    document['revealed'][selected_line_index] = line_array_copy
-    collection.replace_one(query, document)
-    collection.update_one(query, {"$set": {"lastUpdate": datetime.datetime.utcnow()}})
-    return document
-
-
-def add_hidden_to_change(data):
+# NEW!!!
+def replace_revealed_object(data):
     user = "admin"
     password = os.getenv('MONGODBPASSWORD')
     client = MongoClient(
@@ -103,6 +81,51 @@ def add_hidden_to_change(data):
     collection.replace_one(query, document)
     collection.update_one(query, {"$set": {"lastUpdate": datetime.datetime.utcnow()}})
     return document
+
+
+# def add_revealed_to_change(data):
+#     user = "admin"
+#     password = os.getenv('MONGODBPASSWORD')
+#     client = MongoClient(
+#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         server_api=ServerApi('1'))
+#     db = client["fyp"]
+#     collection = db["paragraphs"]
+#
+#     # Extract the originalParagraphId & chosenIndex property from the data object
+#     original_paragraph_id = data['originalParagraphId']
+#     selected_line_index = data['selectedLineIndex']
+#     line_array_copy = data['lineArrayCopy']
+#
+#     # Find the document where to add the new revealed
+#     query = {"_id": ObjectId(original_paragraph_id)}
+#     document = collection.find_one(query)
+#     document['revealed'][selected_line_index] = line_array_copy
+#     collection.replace_one(query, document)
+#     collection.update_one(query, {"$set": {"lastUpdate": datetime.datetime.utcnow()}})
+#     return document
+
+
+# def add_hidden_to_change(data):
+#     user = "admin"
+#     password = os.getenv('MONGODBPASSWORD')
+#     client = MongoClient(
+#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         server_api=ServerApi('1'))
+#     db = client["fyp"]
+#     collection = db["paragraphs"]
+#
+#     # Extract the originalParagraphId & chosenIndex property from the data object
+#     original_paragraph_id = data['originalParagraphId']
+#     new_revealed_object = data['newRevealedObject']
+#
+#     # Find the document where to add the new revealed
+#     query = {"_id": ObjectId(original_paragraph_id)}
+#     document = collection.find_one(query)
+#     document['revealed'] = new_revealed_object
+#     collection.replace_one(query, document)
+#     collection.update_one(query, {"$set": {"lastUpdate": datetime.datetime.utcnow()}})
+#     return document
 
 
 def update_score(data):
