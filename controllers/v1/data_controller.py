@@ -85,9 +85,9 @@ def get_all_paragraph_id():
         if collection is not None: # compare collection with None instead of using it as a boolean
             # find all documents and only retrieve "_id" & "title" fields,
             # convert pymongo cursor object to list of dictionaries
-            paragraphs = list(collection.find({}, {"_id": 1, "title": 1, "parallel_sentences.id": 1}))
+            paragraphs = list(collection.find({}, {"_id": 1, "title": 1, "parallel_sentences.id": 1, "reveal_score_to_public": 1}))
             # paragraph_ids = [str(paragraph["_id"]) for paragraph in paragraphs]
-            logging.info(paragraphs)
+            # logging.info(paragraphs)
             response = make_response(dumps(paragraphs), 200)
         else:
             response = make_response("Paragraph not found", 404)

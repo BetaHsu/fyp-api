@@ -70,6 +70,13 @@ def replace_revealed_object(data):
     db = client["fyp"]
     collection = db["paragraphs"]
 
+    # testing for print only
+    # for collection_name in db.list_collection_names():
+    #     collection = db[collection_name]
+    #     for document in collection.find():
+    #         logging.info(document)
+    # client.close()
+
     # Extract the originalParagraphId & chosenIndex property from the data object
     original_paragraph_id = data['originalParagraphId']
     new_revealed_object = data['newRevealedObject']
