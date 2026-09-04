@@ -11,15 +11,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 from pymongo import MongoClient
 
+# Full connection string, including credentials, comes from the environment.
+MONGODB_URI = os.getenv("MONGODB_URI")
+
 
 # This service is for database manipulation
 
 def add_paragraph(paragraph):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["paragraphs"]
 
@@ -37,11 +36,7 @@ def add_paragraph(paragraph):
 
 
 def add_sentence(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["paragraphs"]
 
@@ -62,11 +57,7 @@ def add_sentence(data):
 
 # NEW!!!
 def replace_revealed_object(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["paragraphs"]
 
@@ -91,10 +82,8 @@ def replace_revealed_object(data):
 
 
 # def add_revealed_to_change(data):
-#     user = "admin"
-#     password = os.getenv('MONGODBPASSWORD')
 #     client = MongoClient(
-#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         MONGODB_URI,
 #         server_api=ServerApi('1'))
 #     db = client["fyp"]
 #     collection = db["paragraphs"]
@@ -114,10 +103,8 @@ def replace_revealed_object(data):
 
 
 # def add_hidden_to_change(data):
-#     user = "admin"
-#     password = os.getenv('MONGODBPASSWORD')
 #     client = MongoClient(
-#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         MONGODB_URI,
 #         server_api=ServerApi('1'))
 #     db = client["fyp"]
 #     collection = db["paragraphs"]
@@ -136,11 +123,7 @@ def replace_revealed_object(data):
 
 
 def update_score(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["paragraphs"]
 
@@ -154,11 +137,7 @@ def update_score(data):
 
 
 def add_work_id_to_user(data):
-    user = "admin"
-    password = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["users"]
 
@@ -180,11 +159,7 @@ def add_work_id_to_user(data):
 
 def signup(username, email, password, isSigningUp):
     # connect to the db
-    user = "admin"
-    dbpassword = os.getenv('MONGODBPASSWORD')
-    client = MongoClient(
-        "mongodb+srv://" + user + ":" + dbpassword + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
-        server_api=ServerApi('1'))
+    client = MongoClient(MONGODB_URI, server_api=ServerApi("1"))
     db = client["fyp"]
     collection = db["users"]
 
@@ -214,10 +189,8 @@ def signup(username, email, password, isSigningUp):
 
 # def get_user_access(username):
 #     # connect to the db
-#     user = "admin"
-#     password = os.getenv('MONGODBPASSWORD')
 #     client = MongoClient(
-#         "mongodb+srv://" + user + ":" + password + "@cluster0.xcvzv0m.mongodb.net/?retryWrites=true&w=majority",
+#         MONGODB_URI,
 #         server_api=ServerApi('1'))
 #     db = client["fyp"]
 #     collection = db["users"]
