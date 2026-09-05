@@ -28,6 +28,8 @@ The connection string is read from the `MONGODB_URI` environment variable. No cr
 
 Built in 2023, no longer maintained. Public as a record of the project.
 
+Known limitation: this build stores user passwords in plain text. A rebuild would hash them.
+
 ## License
 
 © 2023 Beta HSU Yun Chu. All rights reserved. The code is readable here for reference. The system design and the concept behind it are not licensed for reuse, and I am still developing them.
